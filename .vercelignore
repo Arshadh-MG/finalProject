@@ -7,5 +7,9 @@ wildlife_data/
 **/wildlife_data/
 *.zip
 **/*.zip
+*.tar
+**/*.tar
+*.gz
+**/*.gz
 static/uploads/
 static/annotated/
