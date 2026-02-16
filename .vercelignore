@@ -2,6 +2,10 @@ __pycache__/
 *.pyc
 .git/
 runs/
-*.zip
-*.pt.bak
+**/runs/
 wildlife_data/
+**/wildlife_data/
+*.zip
+**/*.zip
+static/uploads/
+static/annotated/
