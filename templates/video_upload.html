@@ -1,0 +1,276 @@
+{% extends "base.html" %}
+
+{% block title %}Video Upload - Wildlife Injury Detection{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-4">
+        <i class="fas fa-video me-2"></i>
+        Video Upload & Analysis
+    </h1>
+
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-upload me-2"></i> Upload Video
+                </div>
+                <div class="card-body">
+                    <form id="videoUploadForm" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="videoFile" class="form-label">Select Video File</label>
+                            <input type="file" class="form-control" id="videoFile" name="file" 
+                                   accept="video/*" required>
+                        </div>
+                        
+                        <div class="drop-zone" id="dropZone">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p class="mb-0 mt-2">Drag and drop video here or click to browse</p>
+                            <p class="small text-muted">Supported: MP4, AVI, MOV, MKV, FLV</p>
+                        </div>
+                        
+                        <div class="mt-3" id="fileInfo" style="display: none;">
+                            <div class="alert alert-info">
+                                <i class="fas fa-file-video me-2"></i>
+                                <span id="fileName"></span>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100 mt-3" id="uploadBtn">
+                            <i class="fas fa-play me-2"></i>Analyze Video
+                        </button>
+                    </form>
+                    
+                    <div class="mt-3" id="loadingIndicator" style="display: none;">
+                        <div class="text-center">
+                            <div class="loading-spinner"></div>
+                            <p class="mt-2">Processing video... This may take a while.</p>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                 role="progressbar" style="width: 100%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-list me-2"></i> Processing Results
+                </div>
+                <div class="card-body" id="resultsContainer">
+                    <div class="text-center text-muted py-5">
+                        <i class="fas fa-video fa-3x mb-3"></i>
+                        <p>Upload a video to see processing results</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Instructions -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-info-circle me-2"></i> How Video Analysis Works
+                </div>
+                <div class="card-body">
+                    <ol>
+                        <li>Upload a video file containing animals in motion</li>
+                        <li>The system extracts frames and runs YOLOv8 detection on each frame</li>
+                        <li>Animals are tracked across frames using the SlowFast Network</li>
+                        <li>Behavioral analysis identifies injury indicators such as:
+                            <ul>
+                                <li>Limping or uneven gait</li>
+                                <li>Leg dragging or abnormal movement</li>
+                                <li>Sudden collapse or prolonged immobility</li>
+                                <li>Distress movement patterns</li>
+                            </ul>
+                        </li>
+                        <li>Evidence clips are saved when injury is detected</li>
+                        <li>Alerts are generated when injury probability exceeds 75%</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const dropZone = document.getElementById('dropZone');
+    const videoFile = document.getElementById('videoFile');
+    const fileInfo = document.getElementById('fileInfo');
+    const fileName = document.getElementById('fileName');
+    const uploadForm = document.getElementById('videoUploadForm');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const resultsContainer = document.getElementById('resultsContainer');
+
+    // Click to browse
+    dropZone.addEventListener('click', () => videoFile.click());
+
+    // Drag and drop
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('bg-light');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('bg-light');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('bg-light');
+        
+        if (e.dataTransfer.files.length) {
+            videoFile.files = e.dataTransfer.files;
+            showFileInfo(e.dataTransfer.files[0]);
+        }
+    });
+
+    // File input change
+    videoFile.addEventListener('change', (e) => {
+        if (e.target.files.length) {
+            showFileInfo(e.target.files[0]);
+        }
+    });
+
+    function showFileInfo(file) {
+        fileName.textContent = file.name + ' (' + formatFileSize(file.size) + ')';
+        fileInfo.style.display = 'block';
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // Form submission
+    uploadForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = new FormData();
+        formData.append('file', videoFile.files[0]);
+        
+        // Show loading
+        loadingIndicator.style.display = 'block';
+        uploadBtn.disabled = true;
+        resultsContainer.innerHTML = '<div class="text-center py-5"><div class="loading-spinner"></div><p class="mt-2">Processing video...</p></div>';
+        
+        try {
+            const response = await fetch('/video-upload', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const result = await response.json();
+            
+            if (result.error) {
+                resultsContainer.innerHTML = `<div class="alert alert-danger">${result.error}</div>`;
+            } else {
+                displayResults(result);
+            }
+        } catch (error) {
+            resultsContainer.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
+        } finally {
+            loadingIndicator.style.display = 'none';
+            uploadBtn.disabled = false;
+        }
+    });
+
+    function displayResults(result) {
+        let html = '';
+        
+        // Video info
+        html += `
+            <div class="alert alert-info mb-3">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>Video Processed:</strong> ${result.total_frames_processed} frames, 
+                ${result.unique_animals} unique animal(s) detected
+            </div>
+        `;
+        
+        // Show annotated video if available
+        if (result.annotated_video) {
+            html += `
+                <div class="mb-3">
+                    <h5>Annotated Video</h5>
+                    <video controls class="w-100">
+                        <source src="/static/annotated/${result.annotated_video.split('/').pop()}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+            `;
+        }
+        
+        // Show analysis results
+        if (result.analysis_results && result.analysis_results.length > 0) {
+            html += `<h5 class="mt-3">Analysis Results</h5>`;
+            
+            result.analysis_results.forEach((anal, index) => {
+                const injuryClass = anal.injury_probability >= 0.75 ? 'text-danger' : 'text-success';
+                const injuryBadge = anal.injury_probability >= 0.75 ? 
+                    '<span class="badge bg-danger ms-2">INJURY DETECTED</span>' : 
+                    '<span class="badge bg-success ms-2">Normal</span>';
+                
+                html += `
+                    <div class="card mb-2">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>${anal.animal_class}</strong>
+                                    <span class="badge bg-secondary ms-2">YOLO: ${(anal.yolo_confidence * 100).toFixed(1)}%</span>
+                                    ${injuryBadge}
+                                </div>
+                                <div class="${injuryClass}">
+                                    Injury Probability: ${(anal.injury_probability * 100).toFixed(1)}%
+                                </div>
+                            </div>
+                            ${anal.indicators && anal.indicators.length > 0 ? `
+                                <div class="mt-2">
+                                    <small class="text-muted">Indicators: ${anal.indicators.join(', ')}</small>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+        } else {
+            html += '<div class="alert alert-info mt-3">No animals detected in the video</div>';
+        }
+        
+        // Show alerts
+        if (result.alerts && result.alerts.length > 0) {
+            html += `
+                <div class="alert alert-danger mt-3">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>${result.alerts.length} Alert(s) Generated!</strong>
+                </div>
+            `;
+            
+            result.alerts.forEach(alert => {
+                html += `
+                    <div class="card mb-2 border-danger">
+                        <div class="card-body">
+                            <h6 class="text-danger">Alert: ${alert.animal_class}</h6>
+                            <p class="mb-1">Injury Probability: ${(alert.injury_probability * 100).toFixed(1)}%</p>
+                            <p class="mb-0 small text-muted">Time: ${alert.timestamp}</p>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        
+        resultsContainer.innerHTML = html;
+    }
+</script>
+{% endblock %}

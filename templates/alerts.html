@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+
+{% block title %}Alerts - Wildlife Injury Detection{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-4">
+        <i class="fas fa-bell me-2"></i>
+        Wildlife Injury Alerts
+    </h1>
+
+    <!-- Filters -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label for="filterSeverity" class="form-label">Severity</label>
+                            <select class="form-select" id="filterSeverity">
+                                <option value="">All</option>
+                                <option value="critical">Critical</option>
+                                <option value="high">High</option>
+                                <option value="medium">Medium</option>
+                                <option value="low">Low</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="filterMode" class="form-label">Input Mode</label>
+                            <select class="form-select" id="filterMode">
+                                <option value="">All</option>
+                                <option value="image">Image</option>
+                                <option value="video">Video</option>
+                                <option value="live_camera">Live Camera</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="filterAnimal" class="form-label">Animal Class</label>
+                            <input type="text" class="form-control" id="filterAnimal" placeholder="e.g., dog">
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button class="btn btn-primary w-100" onclick="applyFilters()">
+                                <i class="fas fa-filter me-2"></i>Apply Filters
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alerts List -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-list me-2"></i>Alert List</span>
+                    <span class="badge bg-primary" id="alertCount">0 alerts</span>
+                </div>
+                <div class="card-body" id="alertsContainer">
+                    <div class="text-center py-5">
+                        <div class="loading-spinner"></div>
+                        <p class="mt-2">Loading alerts...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let allAlerts = [];
+
+    // Load alerts on page load
+    loadAlerts();
+
+    function loadAlerts() {
+        fetch('/api/alerts')
+            .then(response => response.json())
+            .then(alerts => {
+                allAlerts = alerts;
+                displayAlerts(alerts);
+            })
+            .catch(error => {
+                console.error('Error loading alerts:', error);
+                document.getElementById('alertsContainer').innerHTML = 
+                    '<div class="alert alert-danger">Error loading alerts</div>';
+            });
+    }
+
+    function displayAlerts(alerts) {
+        const container = document.getElementById('alertsContainer');
+        document.getElementById('alertCount').textContent = alerts.length + ' alert' + (alerts.length !== 1 ? 's' : '');
+
+        if (alerts.length === 0) {
+            container.innerHTML = `
+                <div class="text-center text-muted py-5">
+                    <i class="fas fa-bell-slash fa-3x mb-3"></i>
+                    <p>No alerts yet</p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '';
+
+        // Sort by timestamp (newest first)
+        alerts.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+        alerts.forEach(alert => {
+            const severityClass = getSeverityClass(alert.severity);
+            const severityBadge = `<span class="badge ${severityClass}">${alert.severity || 'unknown'}</span>`;
+            const statusBadge = alert.status === 'active' ? 
+                '<span class="badge bg-success">Active</span>' : 
+                '<span class="badge bg-secondary">Resolved</span>';
+
+            html += `
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h5 class="mb-2">
+                                    <i class="fas fa-exclamation-triangle text-danger me-2"></i>
+                                    ${alert.animal_class}
+                                    ${severityBadge}
+                                    ${statusBadge}
+                                </h5>
+                                <p class="mb-1">
+                                    <strong>Alert Type:</strong> ${alert.alert_type}
+                                </p>
+                                <p class="mb-1">
+                                    <strong>Input Mode:</strong> ${alert.input_mode}
+                                </p>
+                                <p class="mb-1">
+                                    <strong>Camera ID:</strong> ${alert.camera_id}
+                                </p>
+                                <p class="mb-1">
+                                    <strong>Timestamp:</strong> ${alert.timestamp}
+                                </p>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="bg-light p-3 rounded">
+                                    <p class="mb-1">
+                                        <strong>YOLO Confidence:</strong> 
+                                        ${(alert.yolo_confidence * 100).toFixed(1)}%
+                                    </p>
+                                    <p class="mb-1">
+                                        <strong>Injury Probability:</strong> 
+                                        <span class="${alert.injury_probability >= 0.75 ? 'text-danger fw-bold' : ''}">
+                                            ${(alert.injury_probability * 100).toFixed(1)}%
+                                        </span>
+                                    </p>
+                                    <p class="mb-0">
+                                        <strong>Bounding Box:</strong> 
+                                        [${alert.bounding_box.join(', ')}]
+                                    </p>
+                                </div>
+                                ${alert.evidence_path ? `
+                                    <a href="${alert.evidence_path}" class="btn btn-sm btn-secondary mt-2" target="_blank">
+                                        <i class="fas fa-video me-1"></i>View Evidence
+                                    </a>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+    }
+
+    function getSeverityClass(severity) {
+        switch (severity) {
+            case 'critical': return 'bg-danger';
+            case 'high': return 'bg-warning';
+            case 'medium': return 'bg-info';
+            case 'low': return 'bg-success';
+            default: return 'bg-secondary';
+        }
+    }
+
+    function applyFilters() {
+        const severity = document.getElementById('filterSeverity').value;
+        const mode = document.getElementById('filterMode').value;
+        const animal = document.getElementById('filterAnimal').value.toLowerCase();
+
+        let filtered = allAlerts;
+
+        if (severity) {
+            filtered = filtered.filter(a => a.severity === severity);
+        }
+
+        if (mode) {
+            filtered = filtered.filter(a => a.input_mode === mode);
+        }
+
+        if (animal) {
+            filtered = filtered.filter(a => a.animal_class.toLowerCase().includes(animal));
+        }
+
+        displayAlerts(filtered);
+    }
+
+    // Auto-refresh every 30 seconds
+    setInterval(loadAlerts, 30000);
+</script>
+{% endblock %}

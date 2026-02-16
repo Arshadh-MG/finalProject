@@ -1,0 +1,336 @@
+{% extends "base.html" %}
+
+{% block title %}Live Camera - Wildlife Injury Detection{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-4">
+        <i class="fas fa-camera me-2"></i>
+        Live Camera Monitoring
+    </h1>
+
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-plus me-2"></i> Add Camera
+                </div>
+                <div class="card-body">
+                    <form id="cameraForm">
+                        <div class="mb-3">
+                            <label for="cameraId" class="form-label">Camera ID</label>
+                            <input type="text" class="form-control" id="cameraId" placeholder="e.g., forest_cam_01" required>
+                        </div>
+                        
+                        <!-- Camera source selection -->
+                        <div class="mb-3">
+                            <label class="form-label">Camera Source</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="cameraSource" id="sourceWebcam" value="webcam" checked>
+                                <label class="form-check-label" for="sourceWebcam">
+                                    Laptop Webcam (default)
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="cameraSource" id="sourceForest" value="forest">
+                                <label class="form-check-label" for="sourceForest">
+                                    Forest Camera (pre‑configured RTSP)
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="cameraSource" id="sourceCustom" value="custom">
+                                <label class="form-check-label" for="sourceCustom">
+                                    Custom RTSP URL
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3" id="rtspUrlGroup">
+                            <label for="rtspUrl" class="form-label">RTSP URL</label>
+                            <input type="text" class="form-control" id="rtspUrl" placeholder="rtsp://example.com/stream">
+                            <small class="text-muted" id="rtspHelp">Enter the RTSP URL of your camera</small>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-success w-100" id="startBtn">
+                            <i class="fas fa-play me-2"></i>Start Camera
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-list me-2"></i> Active Cameras
+                </div>
+                <div class="card-body" id="camerasList">
+                    <div class="text-center text-muted py-3">
+                        <i class="fas fa-video-slash fa-2x mb-2"></i>
+                        <p class="mb-0">No active cameras</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-desktop me-2"></i> Camera Feeds
+                </div>
+                <div class="card-body">
+                    <div class="camera-grid" id="cameraGrid">
+                        <div class="text-center text-muted py-5">
+                            <i class="fas fa-video-slash fa-3x mb-3"></i>
+                            <p>No active camera feeds</p>
+                            <p class="small">Add a camera to start monitoring</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Instructions -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-info-circle me-2"></i> How Live Monitoring Works
+                </div>
+                <div class="card-body">
+                    <ol>
+                        <li>Add a camera by providing a Camera ID and selecting a source.</li>
+                        <li>If "Laptop Webcam" is chosen, the system uses your default camera.</li>
+                        <li>If "Forest Camera" is chosen, a pre‑configured RTSP URL is used (you can change it in the code).</li>
+                        <li>If "Custom RTSP URL" is chosen, enter the URL manually.</li>
+                        <li>The system continuously processes frames in real‑time.</li>
+                        <li>YOLOv8 detects animals in each frame.</li>
+                        <li>SlowFast Network analyzes motion patterns using a sliding window buffer.</li>
+                        <li>Injury indicators detected: limping, leg dragging, sudden collapse, prolonged immobility, distress patterns.</li>
+                        <li>Alerts are generated immediately when injury probability exceeds 75%.</li>
+                        <li>Duplicate alerts are prevented within 5 minutes per camera zone.</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const cameraForm = document.getElementById('cameraForm');
+    const camerasList = document.getElementById('camerasList');
+    const cameraGrid = document.getElementById('cameraGrid');
+    const startBtn = document.getElementById('startBtn');
+    const rtspInput = document.getElementById('rtspUrl');
+    const rtspGroup = document.getElementById('rtspUrlGroup');
+    const sourceRadios = document.querySelectorAll('input[name="cameraSource"]');
+    
+    // Pre‑configured forest camera RTSP URL – REPLACE WITH YOUR ACTUAL URL
+    const FOREST_CAMERA_RTSP = 'rtsp://your-forest-camera-ip/stream';  // <-- Change this
+
+    // Handle source selection
+    sourceRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.value === 'webcam') {
+                rtspInput.disabled = true;
+                rtspInput.value = '';
+                rtspGroup.style.opacity = '0.5';
+            } else if (this.value === 'forest') {
+                rtspInput.disabled = false;
+                rtspInput.value = FOREST_CAMERA_RTSP;
+                rtspGroup.style.opacity = '1';
+            } else if (this.value === 'custom') {
+                rtspInput.disabled = false;
+                rtspInput.value = '';
+                rtspGroup.style.opacity = '1';
+            }
+        });
+    });
+
+    // Initialize with webcam selected
+    sourceRadios[0].dispatchEvent(new Event('change'));
+
+    // Load cameras on page load
+    loadCameras();
+
+    // Form submission
+    cameraForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const cameraId = document.getElementById('cameraId').value;
+        let rtspUrl = rtspInput.value;
+        
+        // For webcam, ensure empty string is sent
+        const selectedSource = document.querySelector('input[name="cameraSource"]:checked').value;
+        if (selectedSource === 'webcam') {
+            rtspUrl = '';
+        }
+        
+        startBtn.disabled = true;
+        startBtn.innerHTML = '<span class="loading-spinner me-2"></span>Starting...';
+        
+        try {
+            const response = await fetch('/live-camera', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    action: 'start',
+                    camera_id: cameraId,
+                    rtsp_url: rtspUrl
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (result.status === 'success') {
+                alert('Camera started successfully!');
+                loadCameras();
+                cameraForm.reset();
+                // Reset source to webcam
+                sourceRadios[0].checked = true;
+                sourceRadios[0].dispatchEvent(new Event('change'));
+            } else {
+                alert('Error: ' + result.message);
+            }
+        } catch (error) {
+            alert('Error: ' + error.message);
+        } finally {
+            startBtn.disabled = false;
+            startBtn.innerHTML = '<i class="fas fa-play me-2"></i>Start Camera';
+        }
+    });
+
+    // Load cameras
+    async function loadCameras() {
+        try {
+            const response = await fetch('/live-camera', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ action: 'status' })
+            });
+            
+            const result = await response.json();
+            
+            if (result.cameras && result.cameras.length > 0) {
+                updateCamerasList(result.cameras);
+                updateCameraGrid(result.cameras);
+            } else {
+                camerasList.innerHTML = `
+                    <div class="text-center text-muted py-3">
+                        <i class="fas fa-video-slash fa-2x mb-2"></i>
+                        <p class="mb-0">No active cameras</p>
+                    </div>
+                `;
+                cameraGrid.innerHTML = `
+                    <div class="text-center text-muted py-5">
+                        <i class="fas fa-video-slash fa-3x mb-3"></i>
+                        <p>No active camera feeds</p>
+                        <p class="small">Add a camera to start monitoring</p>
+                    </div>
+                `;
+            }
+        } catch (error) {
+            console.error('Error loading cameras:', error);
+        }
+    }
+
+    function updateCamerasList(cameras) {
+        let html = '';
+        
+        cameras.forEach(cam => {
+            html += `
+                <div class="d-flex justify-content-between align-items-center p-2 mb-2 bg-light rounded">
+                    <div>
+                        <strong>${cam.camera_id}</strong>
+                        <br>
+                        <small class="text-muted">${cam.rtsp_url || 'Default Camera'}</small>
+                    </div>
+                    <div>
+                        <span class="badge bg-${cam.running ? 'success' : 'secondary'} me-2">
+                            ${cam.running ? 'Active' : 'Stopped'}
+                        </span>
+                        <button class="btn btn-sm btn-danger" onclick="stopCamera('${cam.camera_id}')">
+                            <i class="fas fa-stop"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+        
+        camerasList.innerHTML = html;
+    }
+
+    function updateCameraGrid(cameras) {
+        const activeCameras = cameras.filter(cam => cam.running);
+        
+        if (activeCameras.length === 0) {
+            cameraGrid.innerHTML = `
+                <div class="text-center text-muted py-5">
+                    <i class="fas fa-video-slash fa-3x mb-3"></i>
+                    <p>No active camera feeds</p>
+                    <p class="small">Add a camera to start monitoring</p>
+                </div>
+            `;
+            return;
+        }
+        
+        let html = '';
+        
+        activeCameras.forEach(cam => {
+            html += `
+                <div class="camera-card">
+                    <img src="/video-feed/${cam.camera_id}" alt="Camera Feed" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2YzZjRmNiIvPjx0ZXh0IHg9IjE1MCIgeT0iMTAwIiBmb250LXNpemU9IjE2IiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+Tm8gRmVlZDwvdGV4dD48L3N2Zz4='">
+                    <div class="card-body">
+                        <h6>${cam.camera_id}</h6>
+                        <p class="mb-0 small text-muted">
+                            Frames: ${cam.stats.frames_processed} | 
+                            Animals: ${cam.stats.animals_detected} | 
+                            Alerts: ${cam.stats.alerts_generated}
+                        </p>
+                    </div>
+                </div>
+            `;
+        });
+        
+        cameraGrid.innerHTML = html;
+    }
+
+    // Stop camera
+    async function stopCamera(cameraId) {
+        if (!confirm('Stop camera ' + cameraId + '?')) {
+            return;
+        }
+        
+        try {
+            const response = await fetch('/live-camera', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    action: 'stop',
+                    camera_id: cameraId
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (result.status === 'success') {
+                loadCameras();
+            } else {
+                alert('Error: ' + result.message);
+            }
+        } catch (error) {
+            alert('Error: ' + error.message);
+        }
+    }
+
+    // Refresh cameras every 5 seconds
+    setInterval(loadCameras, 5000);
+</script>
+{% endblock %}

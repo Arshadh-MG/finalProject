@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Wildlife Injury Detection{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Hero Section -->
+    <div class="row justify-content-center">
+        <div class="col-lg-10 text-center py-5">
+            <h1 class="display-4 fw-bold text-success mb-4">
+                <i class="fas fa-paw me-3"></i>
+                Wildlife Injury Detection System
+            </h1>
+            <p class="lead text-muted mb-5">
+                Advanced AI-powered system for detecting and alerting wildlife injuries in dense forest environments
+                using YOLOv8 and SlowFast Networks
+            </p>
+        </div>
+    </div>
+
+    <!-- Feature Cards -->
+    <div class="row g-4 mb-5">
+        <!-- Image Upload -->
+        <div class="col-md-4">
+            <div class="card feature-card h-100">
+                <i class="fas fa-image"></i>
+                <h3>Image Analysis</h3>
+                <p class="text-muted">Upload images for instant wildlife injury detection using advanced computer vision</p>
+                <a href="/image-upload" class="btn btn-primary mt-3">
+                    <i class="fas fa-upload me-2"></i>Upload Image
+                </a>
+            </div>
+        </div>
+
+        <!-- Video Upload -->
+        <div class="col-md-4">
+            <div class="card feature-card h-100">
+                <i class="fas fa-video"></i>
+                <h3>Video Analysis</h3>
+                <p class="text-muted">Process video footage to analyze animal behavior and detect injuries over time</p>
+                <a href="/video-upload" class="btn btn-primary mt-3">
+                    <i class="fas fa-upload me-2"></i>Upload Video
+                </a>
+            </div>
+        </div>
+
+        <!-- Live Camera -->
+        <div class="col-md-4">
+            <div class="card feature-card h-100">
+                <i class="fas fa-camera"></i>
+                <h3>Live Monitoring</h3>
+                <p class="text-muted">Connect to camera streams for real-time wildlife injury detection and alerts</p>
+                <a href="/live-camera" class="btn btn-primary mt-3">
+                    <i class="fas fa-eye me-2"></i>View Live
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- How It Works -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="text-center mb-4">How It Works</h2>
+        </div>
+        <div class="col-md-3 text-center">
+            <div class="process-step">
+                <div class="step-icon bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                    <i class="fas fa-upload fa-lg"></i>
+                </div>
+                <h5 class="mt-3">1. Input</h5>
+                <p class="text-muted small">Upload image, video, or connect to camera</p>
+            </div>
+        </div>
+        <div class="col-md-3 text-center">
+            <div class="process-step">
+                <div class="step-icon bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                    <i class="fas fa-search fa-lg"></i>
+                </div>
+                <h5 class="mt-3">2. Detection</h5>
+                <p class="text-muted small">YOLOv8 identifies animals in the footage</p>
+            </div>
+        </div>
+        <div class="col-md-3 text-center">
+            <div class="process-step">
+                <div class="step-icon bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                    <i class="fas fa-brain fa-lg"></i>
+                </div>
+                <h5 class="mt-3">3. Analysis</h5>
+                <p class="text-muted small">SlowFast Network analyzes behavior patterns</p>
+            </div>
+        </div>
+        <div class="col-md-3 text-center">
+            <div class="process-step">
+                <div class="step-icon bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                    <i class="fas fa-bell fa-lg"></i>
+                </div>
+                <h5 class="mt-3">4. Alert</h5>
+                <p class="text-muted small">Generate alerts when injury is detected</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Features -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="text-center mb-4">System Features</h2>
+        </div>
+        <div class="col-md-6 col-lg-4 mb-3">
+            <div class="d-flex align-items-center">
+                <div class="feature-icon bg-success text-white rounded p-2 me-3">
+                    <i class="fas fa-crosshairs"></i>
+                </div>
+                <div>
+                    <h6 class="mb-0">YOLOv8 Detection</h6>
+                    <small class="text-muted">Real-time animal detection</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-4 mb-3">
+            <div class="d-flex align-items-center">
+                <div class="feature-icon bg-success text-white rounded p-2 me-3">
+                    <i class="fas fa-film"></i>
+                </div>
+                <div>
+                    <h6 class="mb-0">SlowFast Analysis</h6>
+                    <small class="text-muted">Behavioral pattern analysis</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-4 mb-3">
+            <div class="d-flex align-items-center">
+                <div class="feature-icon bg-success text-white rounded p-2 me-3">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <div>
+                    <h6 class="mb-0">Real-time Processing</h6>
+                    <small class="text-muted">Instant injury detection</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-4 mb-3">
+            <div class="d-flex align-items-center">
+                <div class="feature-icon bg-success text-white rounded p-2 me-3">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div>
+                    <h6 class="mb-0">Auto Alerts</h6>
+                    <small class="text-muted">Automatic injury alerts</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-4 mb-3">
+            <div class="d-flex align-items-center">
+                <div class="feature-icon bg-success text-white rounded p-2 me-3">
+                    <i class="fas fa-video-slash"></i>
+                </div>
+                <div>
+                    <h6 class="mb-0">Evidence Saving</h6>
+                    <small class="text-muted">Save proof footage</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-4 mb-3">
+            <div class="d-flex align-items-center">
+                <div class="feature-icon bg-success text-white rounded p-2 me-3">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div>
+                    <h6 class="mb-0">Non-intrusive</h6>
+                    <small class="text-muted">Wildlife-friendly monitoring</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row mb-5">
+        <div class="col-md-4">
+            <div class="stats-card">
+                <h2><i class="fas fa-bell me-2"></i><span id="totalAlerts">0</span></h2>
+                <p>Total Alerts Generated</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stats-card">
+                <h2><i class="fas fa-camera me-2"></i><span id="activeCameras">0</span></h2>
+                <p>Active Cameras</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stats-card">
+                <h2><i class="fas fa-check-circle me-2"></i><span id="systemStatus">Ready</span></h2>
+                <p>System Status</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Fetch system status
+    fetch('/system-status')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('totalAlerts').textContent = data.total_alerts || 0;
+            document.getElementById('activeCameras').textContent = data.active_cameras || 0;
+            document.getElementById('systemStatus').textContent = data.yolo_model_loaded ? 'Active' : 'Loading';
+        })
+        .catch(error => {
+            console.error('Error fetching system status:', error);
+        });
+</script>
+{% endblock %}
