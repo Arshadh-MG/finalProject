@@ -1,0 +1,66 @@
+2026-02-17 00:37:25 - WildlifeInjuryDetection - INFO - YOLOv8 detector initialized successfully
+2026-02-17 00:37:25 - WildlifeInjuryDetection - INFO - SlowFast analyzer initialized successfully
+2026-02-17 00:37:25 - WildlifeInjuryDetection - INFO - Starting Wildlife Injury Detection System...
+2026-02-17 00:37:35 - WildlifeInjuryDetection - INFO - YOLOv8 detector initialized successfully
+2026-02-17 00:37:35 - WildlifeInjuryDetection - INFO - SlowFast analyzer initialized successfully
+2026-02-17 00:37:35 - WildlifeInjuryDetection - INFO - Starting Wildlife Injury Detection System...
+2026-02-17 00:39:46 - WildlifeInjuryDetection - INFO - Image uploaded: graffie_a239f8a8-ec95-4db8-9bdd-845a927950d3.jpg
+2026-02-17 00:39:46 - WildlifeInjuryDetection - INFO - Processing image: C:\Users\arsath\Documents\Zoom\WildlifeInjuryDetection\static\uploads\graffie_a239f8a8-ec95-4db8-9bdd-845a927950d3.jpg
+2026-02-17 00:39:47 - WildlifeInjuryDetection - INFO - YOLOv8 detections: [{'bbox': [570, 0, 1412, 874], 'confidence': 0.8766918182373047, 'class_id': 0, 'class_name': '1'}, {'bbox': [927, 1, 1290, 512], 'confidence': 0.43348440527915955, 'class_id': 12, 'class_name': '2'}]
+2026-02-17 00:41:59 - WildlifeInjuryDetection - INFO - Image uploaded: download_c29b4f8a-31b0-4dd9-9e94-cc42146b3179.jpg
+2026-02-17 00:41:59 - WildlifeInjuryDetection - INFO - Processing image: C:\Users\arsath\Documents\Zoom\WildlifeInjuryDetection\static\uploads\download_c29b4f8a-31b0-4dd9-9e94-cc42146b3179.jpg
+2026-02-17 00:41:59 - WildlifeInjuryDetection - INFO - YOLOv8 detections: [{'bbox': [47, 11, 207, 146], 'confidence': 0.9097131490707397, 'class_id': 0, 'class_name': '1'}]
+2026-02-17 00:42:05 - WildlifeInjuryDetection - INFO - Image uploaded: download_fd87944f-35ad-4e29-b4ed-c6cfe88ee273.jpg
+2026-02-17 00:42:05 - WildlifeInjuryDetection - INFO - Processing image: C:\Users\arsath\Documents\Zoom\WildlifeInjuryDetection\static\uploads\download_fd87944f-35ad-4e29-b4ed-c6cfe88ee273.jpg
+2026-02-17 00:42:05 - WildlifeInjuryDetection - INFO - YOLOv8 detections: [{'bbox': [14, 25, 150, 140], 'confidence': 0.6121283173561096, 'class_id': 12, 'class_name': '2'}]
+2026-02-17 00:42:16 - WildlifeInjuryDetection - INFO - Image uploaded: download_952e9abc-3cd1-4a8c-b9f9-6cd7a60ec5ed.jpg
+2026-02-17 00:42:16 - WildlifeInjuryDetection - INFO - Processing image: C:\Users\arsath\Documents\Zoom\WildlifeInjuryDetection\static\uploads\download_952e9abc-3cd1-4a8c-b9f9-6cd7a60ec5ed.jpg
+2026-02-17 00:42:16 - WildlifeInjuryDetection - INFO - YOLOv8 detections: [{'bbox': [67, 16, 186, 126], 'confidence': 0.8702876567840576, 'class_id': 0, 'class_name': '1'}]
+2026-02-17 00:42:46 - WildlifeInjuryDetection - INFO - Image uploaded: download_f8c9fedb-9c7d-4e61-af6b-b3131e642e4a.jpg
+2026-02-17 00:42:46 - WildlifeInjuryDetection - INFO - Processing image: C:\Users\arsath\Documents\Zoom\WildlifeInjuryDetection\static\uploads\download_f8c9fedb-9c7d-4e61-af6b-b3131e642e4a.jpg
+2026-02-17 00:42:46 - WildlifeInjuryDetection - INFO - YOLOv8 detections: [{'bbox': [6, 11, 253, 181], 'confidence': 0.872882068157196, 'class_id': 0, 'class_name': '1'}, {'bbox': [117, 3, 274, 182], 'confidence': 0.4231521189212799, 'class_id': 12, 'class_name': '2'}]
+2026-02-17 00:42:56 - WildlifeInjuryDetection - INFO - Image uploaded: download_e8b4021d-4f43-47e2-8fc7-71844d3ccc42.jpg
+2026-02-17 00:42:56 - WildlifeInjuryDetection - INFO - Processing image: C:\Users\arsath\Documents\Zoom\WildlifeInjuryDetection\static\uploads\download_e8b4021d-4f43-47e2-8fc7-71844d3ccc42.jpg
+2026-02-17 00:42:57 - WildlifeInjuryDetection - INFO - YOLOv8 detections: [{'bbox': [41, 14, 215, 166], 'confidence': 0.9416014552116394, 'class_id': 0, 'class_name': '1'}]
+2026-02-17 00:43:05 - WildlifeInjuryDetection - INFO - Image uploaded: download_2a533a89-5488-4067-8266-bbe4e0fa4f1f.jpg
+2026-02-17 00:43:05 - WildlifeInjuryDetection - INFO - Processing image: C:\Users\arsath\Documents\Zoom\WildlifeInjuryDetection\static\uploads\download_2a533a89-5488-4067-8266-bbe4e0fa4f1f.jpg
+2026-02-17 00:43:05 - WildlifeInjuryDetection - INFO - YOLOv8 detections: [{'bbox': [84, 41, 180, 144], 'confidence': 0.8777381777763367, 'class_id': 0, 'class_name': '1'}]
+2026-02-17 00:43:33 - WildlifeInjuryDetection - INFO - Image uploaded: download_b72b9e57-b264-49bc-ab5a-b01412dd2927.jpg
+2026-02-17 00:43:33 - WildlifeInjuryDetection - INFO - Processing image: C:\Users\arsath\Documents\Zoom\WildlifeInjuryDetection\static\uploads\download_b72b9e57-b264-49bc-ab5a-b01412dd2927.jpg
+2026-02-17 00:43:34 - WildlifeInjuryDetection - INFO - YOLOv8 detections: [{'bbox': [94, 21, 240, 171], 'confidence': 0.8875241279602051, 'class_id': 0, 'class_name': '1'}]
+2026-02-17 00:43:49 - WildlifeInjuryDetection - INFO - Image uploaded: injuredpet_41e396ac-756b-4c19-b983-251d92c8df41.webp
+2026-02-17 00:43:49 - WildlifeInjuryDetection - INFO - Processing image: C:\Users\arsath\Documents\Zoom\WildlifeInjuryDetection\static\uploads\injuredpet_41e396ac-756b-4c19-b983-251d92c8df41.webp
+2026-02-17 00:43:50 - WildlifeInjuryDetection - INFO - YOLOv8 detections: [{'bbox': [727, 95, 1916, 996], 'confidence': 0.6899167895317078, 'class_id': 0, 'class_name': '1'}]
+2026-02-17 00:43:59 - WildlifeInjuryDetection - INFO - Image uploaded: download_12356f3b-4293-4749-b264-9f96e3bdfe36.jpg
+2026-02-17 00:43:59 - WildlifeInjuryDetection - INFO - Processing image: C:\Users\arsath\Documents\Zoom\WildlifeInjuryDetection\static\uploads\download_12356f3b-4293-4749-b264-9f96e3bdfe36.jpg
+2026-02-17 00:43:59 - WildlifeInjuryDetection - INFO - YOLOv8 detections: [{'bbox': [95, 4, 230, 168], 'confidence': 0.9730351567268372, 'class_id': 0, 'class_name': '1'}]
+2026-02-17 00:44:43 - WildlifeInjuryDetection - INFO - Image uploaded: download_87886793-19e6-4f1c-8251-f4cd5eab3ecb.jpg
+2026-02-17 00:44:43 - WildlifeInjuryDetection - INFO - Processing image: C:\Users\arsath\Documents\Zoom\WildlifeInjuryDetection\static\uploads\download_87886793-19e6-4f1c-8251-f4cd5eab3ecb.jpg
+2026-02-17 00:44:43 - WildlifeInjuryDetection - INFO - YOLOv8 detections: [{'bbox': [96, 0, 277, 151], 'confidence': 0.8774294257164001, 'class_id': 0, 'class_name': '1'}]
+2026-02-17 00:45:03 - WildlifeInjuryDetection - INFO - Image uploaded: images_ede162fa-ecec-4486-ba6f-9b86ad1a582f.jpg
+2026-02-17 00:45:03 - WildlifeInjuryDetection - INFO - Processing image: C:\Users\arsath\Documents\Zoom\WildlifeInjuryDetection\static\uploads\images_ede162fa-ecec-4486-ba6f-9b86ad1a582f.jpg
+2026-02-17 00:45:04 - WildlifeInjuryDetection - INFO - YOLOv8 detections: []
+2026-02-17 00:45:13 - WildlifeInjuryDetection - INFO - Image uploaded: images_0de50987-c9a4-4d81-af81-68b0aa69e21f.jpg
+2026-02-17 00:45:13 - WildlifeInjuryDetection - INFO - Processing image: C:\Users\arsath\Documents\Zoom\WildlifeInjuryDetection\static\uploads\images_0de50987-c9a4-4d81-af81-68b0aa69e21f.jpg
+2026-02-17 00:45:13 - WildlifeInjuryDetection - INFO - YOLOv8 detections: [{'bbox': [59, 6, 275, 163], 'confidence': 0.8520158529281616, 'class_id': 0, 'class_name': '1'}]
+2026-02-17 00:45:55 - WildlifeInjuryDetection - INFO - Image uploaded: download_0c6af8aa-0160-42a9-aa75-8ab69255fab4.jpg
+2026-02-17 00:45:55 - WildlifeInjuryDetection - INFO - Processing image: C:\Users\arsath\Documents\Zoom\WildlifeInjuryDetection\static\uploads\download_0c6af8aa-0160-42a9-aa75-8ab69255fab4.jpg
+2026-02-17 00:45:55 - WildlifeInjuryDetection - INFO - YOLOv8 detections: [{'bbox': [45, 31, 222, 149], 'confidence': 0.9154075384140015, 'class_id': 0, 'class_name': '1'}]
+2026-02-17 00:46:04 - WildlifeInjuryDetection - INFO - Image uploaded: download_bd5b3aba-d552-48be-ad2f-5450b34a83d2.jpg
+2026-02-17 00:46:04 - WildlifeInjuryDetection - INFO - Processing image: C:\Users\arsath\Documents\Zoom\WildlifeInjuryDetection\static\uploads\download_bd5b3aba-d552-48be-ad2f-5450b34a83d2.jpg
+2026-02-17 00:46:05 - WildlifeInjuryDetection - INFO - YOLOv8 detections: [{'bbox': [74, 64, 233, 177], 'confidence': 0.9456727504730225, 'class_id': 0, 'class_name': '1'}]
+2026-02-17 00:46:16 - WildlifeInjuryDetection - INFO - Image uploaded: download_297cb3f2-14f7-4c55-bfcb-2eb66a9ea056.jpg
+2026-02-17 00:46:16 - WildlifeInjuryDetection - INFO - Processing image: C:\Users\arsath\Documents\Zoom\WildlifeInjuryDetection\static\uploads\download_297cb3f2-14f7-4c55-bfcb-2eb66a9ea056.jpg
+2026-02-17 00:46:16 - WildlifeInjuryDetection - INFO - YOLOv8 detections: [{'bbox': [65, 36, 222, 117], 'confidence': 0.796748697757721, 'class_id': 0, 'class_name': '1'}]
+2026-02-17 00:46:27 - WildlifeInjuryDetection - INFO - Image uploaded: images_0b64f659-9f0f-4295-a411-bf0d9b6e3649.jpg
+2026-02-17 00:46:27 - WildlifeInjuryDetection - INFO - Processing image: C:\Users\arsath\Documents\Zoom\WildlifeInjuryDetection\static\uploads\images_0b64f659-9f0f-4295-a411-bf0d9b6e3649.jpg
+2026-02-17 00:46:27 - WildlifeInjuryDetection - INFO - YOLOv8 detections: [{'bbox': [53, 58, 214, 154], 'confidence': 0.8484084606170654, 'class_id': 0, 'class_name': '1'}]
+2026-02-17 00:46:44 - WildlifeInjuryDetection - INFO - Image uploaded: images_4bbb9240-458a-458a-9092-80d4ed411725.jpg
+2026-02-17 00:46:44 - WildlifeInjuryDetection - INFO - Processing image: C:\Users\arsath\Documents\Zoom\WildlifeInjuryDetection\static\uploads\images_4bbb9240-458a-458a-9092-80d4ed411725.jpg
+2026-02-17 00:46:44 - WildlifeInjuryDetection - INFO - YOLOv8 detections: [{'bbox': [18, 20, 173, 109], 'confidence': 0.8072792291641235, 'class_id': 0, 'class_name': '1'}]
+2026-02-17 00:47:40 - WildlifeInjuryDetection - INFO - Image uploaded: images_982c8954-3db7-4a96-9e52-f6db14ad0933.jpg
+2026-02-17 00:47:40 - WildlifeInjuryDetection - INFO - Processing image: C:\Users\arsath\Documents\Zoom\WildlifeInjuryDetection\static\uploads\images_982c8954-3db7-4a96-9e52-f6db14ad0933.jpg
+2026-02-17 00:47:40 - WildlifeInjuryDetection - INFO - YOLOv8 detections: [{'bbox': [106, 17, 229, 181], 'confidence': 0.9539369940757751, 'class_id': 0, 'class_name': '1'}]
+2026-02-17 00:48:12 - WildlifeInjuryDetection - INFO - Image uploaded: download_66f81410-b246-43a6-a3c1-fa9597a9b76b.jpg
+2026-02-17 00:48:12 - WildlifeInjuryDetection - INFO - Processing image: C:\Users\arsath\Documents\Zoom\WildlifeInjuryDetection\static\uploads\download_66f81410-b246-43a6-a3c1-fa9597a9b76b.jpg
+2026-02-17 00:48:13 - WildlifeInjuryDetection - INFO - YOLOv8 detections: [{'bbox': [78, 17, 274, 182], 'confidence': 0.9225555062294006, 'class_id': 0, 'class_name': '1'}]

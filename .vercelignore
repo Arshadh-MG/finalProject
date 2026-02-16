@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.git/
+runs/
+*.zip
+*.pt.bak
+wildlife_data/
