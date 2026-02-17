@@ -18,7 +18,9 @@ RUN pip install --no-cache-dir -r requirements-full.txt
 
 COPY . .
 
-ENV PORT=10000
+ENV PORT=10000 \
+    DISABLE_LIVE_CAMERA=1 \
+    DISABLE_VIDEO=1
 EXPOSE 10000
 
 # Use a shell so ${PORT} is expanded (Render injects PORT at runtime).
