@@ -21,5 +21,5 @@ COPY . .
 ENV PORT=10000
 EXPOSE 10000
 
-CMD ["gunicorn", "-w", "1", "-k", "gthread", "--threads", "4", "--timeout", "180", "-b", "0.0.0.0:${PORT}", "app:app"]
-
+# Use a shell so ${PORT} is expanded (Render injects PORT at runtime).
+CMD ["sh", "-c", "gunicorn -w 1 -k gthread --threads 4 --timeout 180 -b 0.0.0.0:${PORT} app:app"]

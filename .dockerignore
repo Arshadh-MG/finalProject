@@ -9,4 +9,3 @@ static/evidence/
 *.zip
 *.tar
 *.gz
-models/*.pt
