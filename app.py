@@ -23,6 +23,8 @@ def running_on_vercel():
 VERCEL_MODE = running_on_vercel()
 INFERENCE_URL = os.getenv("INFERENCE_URL", "").strip()
 INFERENCE_TOKEN = os.getenv("INFERENCE_TOKEN", "").strip()
+DISABLE_VIDEO = os.getenv("DISABLE_VIDEO", "").strip() in {"1", "true", "True", "yes", "YES"}
+DISABLE_LIVE_CAMERA = os.getenv("DISABLE_LIVE_CAMERA", "").strip() in {"1", "true", "True", "yes", "YES"}
 
 # Optional heavy deps (not used on Vercel)
 if not VERCEL_MODE:
@@ -384,9 +386,9 @@ def analyze_injury_static(roi, detection):
 @app.route('/video-upload', methods=['GET', 'POST'])
 def video_upload():
     """Handle video upload and processing"""
-    if VERCEL_MODE and request.method == 'POST':
+    if (VERCEL_MODE or DISABLE_VIDEO) and request.method == 'POST':
         return jsonify({
-            'error': 'Video processing is not supported on Vercel Functions for this project (timeout / bundle-size / ephemeral filesystem limits).'
+            'error': 'Video processing is disabled for this deployment.'
         }), 501
 
     if request.method == 'POST':
@@ -423,9 +425,9 @@ def video_upload():
 @app.route('/live-camera', methods=['GET', 'POST'])
 def live_camera():
     """Handle live camera stream processing"""
-    if VERCEL_MODE and request.method == 'POST':
+    if (VERCEL_MODE or DISABLE_LIVE_CAMERA) and request.method == 'POST':
         return jsonify({
-            'error': 'Live camera processing is not supported on Vercel Functions for this project (long-running streaming / background processing not supported).'
+            'error': 'Live camera processing is disabled for this deployment.'
         }), 501
 
     if request.method == 'POST':
@@ -463,8 +465,8 @@ def live_camera():
 @app.route('/video-feed/<camera_id>')
 def video_feed(camera_id):
     """Stream video feed from live camera"""
-    if VERCEL_MODE:
-        return jsonify({'error': 'Video streaming is not supported on Vercel Functions for this project.'}), 501
+    if VERCEL_MODE or DISABLE_LIVE_CAMERA:
+        return jsonify({'error': 'Video streaming is disabled for this deployment.'}), 501
 
     return Response(live_camera_manager.generate_frames(camera_id),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
@@ -489,6 +491,8 @@ def system_status():
     """Get system status"""
     status = {
         'vercel_mode': VERCEL_MODE,
+        'disable_video': DISABLE_VIDEO,
+        'disable_live_camera': DISABLE_LIVE_CAMERA,
         'inference_proxy_enabled': bool(INFERENCE_URL) if VERCEL_MODE else True,
         'yolo_model_loaded': yolo_detector is not None and yolo_detector.loaded,
         'slowfast_model_loaded': slowfast_analyzer is not None,

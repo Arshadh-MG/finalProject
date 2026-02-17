@@ -5,4 +5,8 @@ services:
     plan: free
     autoDeploy: true
     healthCheckPath: /system-status
-
+    envVars:
+      - key: DISABLE_LIVE_CAMERA
+        value: "1"
+      - key: DISABLE_VIDEO
+        value: "1"

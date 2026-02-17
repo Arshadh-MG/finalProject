@@ -9,6 +9,8 @@ import threading
 import queue
 import time
 import logging
+import os
+import glob
 from pathlib import Path
 from utils.condition_assessment import assess_condition
 
@@ -67,6 +69,15 @@ class LiveCameraManager:
                 self.logger.info(f"Opening RTSP stream: {rtsp_url}")
                 cap = cv2.VideoCapture(rtsp_url)
             else:
+                # Avoid probing local camera devices when none exist (common in cloud containers).
+                if os.name != "nt":
+                    device_candidates = glob.glob("/dev/video*")
+                    if not device_candidates:
+                        return {
+                            'status': 'error',
+                            'message': 'No local camera devices found. Use an RTSP URL (cloud containers do not provide /dev/video* webcams).'
+                        }
+
                 # Try multiple camera indices if default fails
                 for idx in range(2):  # try 0 and 1
                     self.logger.info(f"Trying camera index {idx}")
