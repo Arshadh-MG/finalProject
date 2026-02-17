@@ -13,18 +13,42 @@ import base64
 from pathlib import Path
 from flask import Flask, render_template, request, jsonify, Response, redirect, url_for
 from werkzeug.utils import secure_filename
-import numpy as np
-import cv2
-from PIL import Image
+import requests
+
+
+def running_on_vercel():
+    return os.getenv("VERCEL") == "1" or bool(os.getenv("VERCEL_ENV"))
+
+
+VERCEL_MODE = running_on_vercel()
+INFERENCE_URL = os.getenv("INFERENCE_URL", "").strip()
+INFERENCE_TOKEN = os.getenv("INFERENCE_TOKEN", "").strip()
+
+# Optional heavy deps (not used on Vercel)
+if not VERCEL_MODE:
+    import numpy as np
+    import cv2
+    from PIL import Image
+else:
+    np = None
+    cv2 = None
+    Image = None
 
 # Import custom modules
-from modules.yolo_detector import YOLODetector
-from modules.slowfast_analyzer import SlowFastAnalyzer
 from modules.alert_generator import AlertGenerator
-from modules.video_processor import VideoProcessor
-from modules.live_camera import LiveCameraManager
 from utils.logger import setup_logger
 from utils.helpers import allowed_file, create_directories
+
+if not VERCEL_MODE:
+    from modules.yolo_detector import YOLODetector
+    from modules.slowfast_analyzer import SlowFastAnalyzer
+    from modules.video_processor import VideoProcessor
+    from modules.live_camera import LiveCameraManager
+else:
+    YOLODetector = None
+    SlowFastAnalyzer = None
+    VideoProcessor = None
+    LiveCameraManager = None
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -33,10 +57,19 @@ app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024  # 500MB max file size
 
 # Configure upload folders
 BASE_DIR = Path(__file__).parent
-UPLOAD_FOLDER = BASE_DIR / 'static' / 'uploads'
-ANNOTATED_FOLDER = BASE_DIR / 'static' / 'annotated'
-EVIDENCE_FOLDER = BASE_DIR / 'static' / 'evidence'
-LOG_FOLDER = BASE_DIR / 'logs'
+
+if VERCEL_MODE:
+    TMP_BASE = Path(os.getenv("VERCEL_TMP_DIR") or os.getenv("TMPDIR") or os.getenv("TEMP") or "/tmp")
+    DATA_DIR = TMP_BASE / "wildlife_injury_detection"
+    UPLOAD_FOLDER = DATA_DIR / "uploads"
+    ANNOTATED_FOLDER = DATA_DIR / "annotated"
+    EVIDENCE_FOLDER = DATA_DIR / "evidence"
+    LOG_FOLDER = DATA_DIR / "logs"
+else:
+    UPLOAD_FOLDER = BASE_DIR / 'static' / 'uploads'
+    ANNOTATED_FOLDER = BASE_DIR / 'static' / 'annotated'
+    EVIDENCE_FOLDER = BASE_DIR / 'static' / 'evidence'
+    LOG_FOLDER = BASE_DIR / 'logs'
 
 # Create directories
 create_directories([UPLOAD_FOLDER, ANNOTATED_FOLDER, EVIDENCE_FOLDER, LOG_FOLDER])
@@ -54,28 +87,37 @@ ALLOWED_VIDEO_EXTENSIONS = {'mp4', 'avi', 'mov', 'mkv', 'flv'}
 logger = setup_logger('WildlifeInjuryDetection', LOG_FOLDER)
 
 # Initialize detectors and analyzers
-try:
-    yolo_detector = YOLODetector()
-    logger.info("YOLOv8 detector initialized successfully")
-except Exception as e:
-    logger.error(f"Failed to initialize YOLOv8 detector: {e}")
-    yolo_detector = None
+if not VERCEL_MODE:
+    try:
+        yolo_detector = YOLODetector()
+        logger.info("YOLOv8 detector initialized successfully")
+    except Exception as e:
+        logger.error(f"Failed to initialize YOLOv8 detector: {e}")
+        yolo_detector = None
 
-try:
-    slowfast_analyzer = SlowFastAnalyzer()
-    logger.info("SlowFast analyzer initialized successfully")
-except Exception as e:
-    logger.error(f"Failed to initialize SlowFast analyzer: {e}")
+    try:
+        slowfast_analyzer = SlowFastAnalyzer()
+        logger.info("SlowFast analyzer initialized successfully")
+    except Exception as e:
+        logger.error(f"Failed to initialize SlowFast analyzer: {e}")
+        slowfast_analyzer = None
+else:
+    logger.info("VERCEL_MODE enabled: ML inference dependencies are disabled.")
+    yolo_detector = None
     slowfast_analyzer = None
 
 # Initialize alert generator
 alert_generator = AlertGenerator(LOG_FOLDER)
 
 # Initialize video processor
-video_processor = VideoProcessor(yolo_detector, slowfast_analyzer, alert_generator, ANNOTATED_FOLDER, EVIDENCE_FOLDER)
+video_processor = None if VERCEL_MODE else VideoProcessor(
+    yolo_detector, slowfast_analyzer, alert_generator, ANNOTATED_FOLDER, EVIDENCE_FOLDER
+)
 
 # Initialize live camera manager
-live_camera_manager = LiveCameraManager(yolo_detector, slowfast_analyzer, alert_generator, EVIDENCE_FOLDER)
+live_camera_manager = None if VERCEL_MODE else LiveCameraManager(
+    yolo_detector, slowfast_analyzer, alert_generator, EVIDENCE_FOLDER
+)
 
 
 def allowed_file(filename, allowed_extensions):
@@ -94,7 +136,7 @@ def dashboard():
     """Dashboard with system status"""
     stats = {
         'total_alerts': alert_generator.get_alert_count(),
-        'active_cameras': live_camera_manager.get_active_camera_count(),
+        'active_cameras': live_camera_manager.get_active_camera_count() if live_camera_manager else 0,
         'processed_images': 0,
         'processed_videos': 0
     }
@@ -105,6 +147,38 @@ def dashboard():
 def image_upload():
     """Handle image upload and processing"""
     if request.method == 'POST':
+        if VERCEL_MODE:
+            if not INFERENCE_URL:
+                return jsonify({
+                    'error': 'Image inference is disabled on Vercel for this repo. Set INFERENCE_URL to a separate inference server (running this app with requirements-full.txt) to enable /image-upload.'
+                }), 501
+
+            if 'file' not in request.files:
+                return jsonify({'error': 'No file provided'}), 400
+
+            file = request.files['file']
+            if file.filename == '':
+                return jsonify({'error': 'No file selected'}), 400
+
+            headers = {}
+            if INFERENCE_TOKEN:
+                headers['Authorization'] = f"Bearer {INFERENCE_TOKEN}"
+
+            try:
+                resp = requests.post(
+                    INFERENCE_URL.rstrip('/') + '/image-upload',
+                    files={'file': (file.filename, file.stream, file.mimetype or 'application/octet-stream')},
+                    headers=headers,
+                    timeout=120,
+                )
+                content_type = resp.headers.get('content-type', '')
+                if 'application/json' in content_type:
+                    return jsonify(resp.json()), resp.status_code
+                return (resp.text, resp.status_code, {'Content-Type': content_type or 'text/plain'})
+            except requests.RequestException as e:
+                logger.error(f"INFERENCE_URL proxy error: {e}")
+                return jsonify({'error': f'Inference proxy error: {str(e)}'}), 502
+
         if 'file' not in request.files:
             return jsonify({'error': 'No file provided'}), 400
         
@@ -138,6 +212,9 @@ def image_upload():
 def process_image(image_path, unique_id):
     """Process uploaded image for wildlife injury detection"""
     logger.info(f"Processing image: {image_path}")
+
+    if cv2 is None or np is None:
+        raise RuntimeError("Image processing dependencies are not installed.")
     
     # Load image
     image = cv2.imread(image_path)
@@ -159,6 +236,7 @@ def process_image(image_path, unique_id):
         'image_id': unique_id,
         'detections': [],
         'annotated_image': None,
+        'annotated_image_data_url': None,
         'alerts': []
     }
     
@@ -208,11 +286,16 @@ def process_image(image_path, unique_id):
         cv2.rectangle(image, (x1, y1), (x2, y2), color, 2)
         cv2.putText(image, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
     
-    # Save annotated image
-    annotated_filename = f"annotated_{unique_id}.jpg"
-    annotated_path = os.path.join(app.config['ANNOTATED_FOLDER'], annotated_filename)
-    cv2.imwrite(annotated_path, image)
-    results['annotated_image'] = annotated_filename
+    # Save annotated image locally when possible, and always return an inline preview too.
+    if not VERCEL_MODE:
+        annotated_filename = f"annotated_{unique_id}.jpg"
+        annotated_path = os.path.join(app.config['ANNOTATED_FOLDER'], annotated_filename)
+        cv2.imwrite(annotated_path, image)
+        results['annotated_image'] = annotated_filename
+
+    ok, buffer = cv2.imencode(".jpg", image)
+    if ok:
+        results['annotated_image_data_url'] = "data:image/jpeg;base64," + base64.b64encode(buffer).decode("utf-8")
     
     return results
 
@@ -301,6 +384,11 @@ def analyze_injury_static(roi, detection):
 @app.route('/video-upload', methods=['GET', 'POST'])
 def video_upload():
     """Handle video upload and processing"""
+    if VERCEL_MODE and request.method == 'POST':
+        return jsonify({
+            'error': 'Video processing is not supported on Vercel Functions for this project (timeout / bundle-size / ephemeral filesystem limits).'
+        }), 501
+
     if request.method == 'POST':
         if 'file' not in request.files:
             return jsonify({'error': 'No file provided'}), 400
@@ -335,6 +423,11 @@ def video_upload():
 @app.route('/live-camera', methods=['GET', 'POST'])
 def live_camera():
     """Handle live camera stream processing"""
+    if VERCEL_MODE and request.method == 'POST':
+        return jsonify({
+            'error': 'Live camera processing is not supported on Vercel Functions for this project (long-running streaming / background processing not supported).'
+        }), 501
+
     if request.method == 'POST':
         data = request.get_json()
         
@@ -370,6 +463,9 @@ def live_camera():
 @app.route('/video-feed/<camera_id>')
 def video_feed(camera_id):
     """Stream video feed from live camera"""
+    if VERCEL_MODE:
+        return jsonify({'error': 'Video streaming is not supported on Vercel Functions for this project.'}), 501
+
     return Response(live_camera_manager.generate_frames(camera_id),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
@@ -392,9 +488,11 @@ def api_alerts():
 def system_status():
     """Get system status"""
     status = {
+        'vercel_mode': VERCEL_MODE,
+        'inference_proxy_enabled': bool(INFERENCE_URL) if VERCEL_MODE else True,
         'yolo_model_loaded': yolo_detector is not None and yolo_detector.loaded,
         'slowfast_model_loaded': slowfast_analyzer is not None,
-        'active_cameras': live_camera_manager.get_active_camera_count(),
+        'active_cameras': live_camera_manager.get_active_camera_count() if live_camera_manager else 0,
         'total_alerts': alert_generator.get_alert_count(),
         'uptime': datetime.datetime.now().isoformat()
     }

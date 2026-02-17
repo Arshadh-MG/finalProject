@@ -184,7 +184,13 @@
             let html = '';
             
             // Show annotated image if available
-            if (result.annotated_image) {
+            if (result.annotated_image_data_url) {
+                html += `
+                    <div class="mb-3">
+                        <img src="${result.annotated_image_data_url}" class="img-fluid rounded" alt="Annotated">
+                    </div>
+                `;
+            } else if (result.annotated_image) {
                 html += `
                     <div class="mb-3">
                         <img src="/static/annotated/${result.annotated_image}" class="img-fluid rounded" alt="Annotated">

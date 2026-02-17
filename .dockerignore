@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.git/
+.vercel/
+logs/
+static/uploads/
+static/annotated/
+static/evidence/
+*.zip
+*.tar
+*.gz
+models/*.pt
